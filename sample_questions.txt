@@ -1,0 +1,3 @@
+How many incidents were resolved with a workaround?
+What are the most common categories of incidents reported this year?
+What is the average resolution time for 'Network' related incidents?
