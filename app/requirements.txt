@@ -1,0 +1,9 @@
+python-dotenv
+requests
+Flask
+chromadb 
+tiktoken 
+langchain
+langchain-community 
+langchain-core
+boto3

@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ServiceNow Incident Analysis QnA Bot</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #f0f0f0;
+        position: relative;
+      }
+      #chat-container {
+        position: fixed;
+        right: 20px;
+        bottom: 60px;
+        width: 300px;
+        height: 500px;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+        background: #fff;
+        display: flex;
+        flex-direction: column;
+      }
+      #toggle-chat {
+        position: fixed;
+        right: 20px;
+        bottom: 560px;
+        background: #333;
+        color: #fff;
+        border: none;
+        padding: 10px;
+        border-radius: 50%;
+        cursor: pointer;
+        z-index: 10;
+      }
+      #toggle-chat:hover {
+        background: #444;
+      }
+      #chat {
+        flex-grow: 1;
+        border-top-left-radius: 10px;
+        border-top-right-radius: 10px;
+        overflow-y: scroll;
+        padding: 20px;
+      }
+      .user-message {
+        text-align: right;
+        color: blue;
+      }
+      .assistant-message {
+        text-align: left;
+        color: green;
+      }
+      #ask-form {
+        display: flex;
+        padding: 10px;
+        border-top: 1px solid #ccc;
+      }
+      #question {
+        flex-grow: 1;
+        margin-right: 10px;
+        border: none;
+        padding: 10px;
+        border-radius: 5px;
+      }
+      #ask-form input[type="submit"] {
+        background: #333;
+        color: #fff;
+        border: none;
+        padding: 10px;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+      #ask-form input[type="submit"]:hover {
+        background: #444;
+      }
+      footer {
+        position: fixed;
+        left: 0;
+        bottom: 0;
+        width: 100%;
+        background-color: #333;
+        color: white;
+        text-align: center;
+        padding: 10px 0;
+      }
+    </style>
+  </head>
+  <body>
+    <h2 style="text-align: center; color: #333">Chat App</h2>
+    <button id="toggle-chat">-</button>
+    <div id="chat-container">
+      <div id="chat">
+        <!-- The chat history will be inserted here -->
+      </div>
+      <form id="ask-form">
+        <input
+          type="text"
+          id="question"
+          name="question"
+          placeholder="Your question..."
+        />
+        <input type="submit" value="Ask" />
+      </form>
+    </div>
+    <footer>&copy; 2023 Your Company Name</footer>
+    <script>
+      var chatContainer = document.getElementById("chat-container");
+      var toggleChatButton = document.getElementById("toggle-chat");
+      var footer = document.querySelector("footer");
+
+      toggleChatButton.addEventListener("click", function () {
+        var isChatVisible = chatContainer.style.display !== "none";
+        chatContainer.style.display = isChatVisible ? "none" : "flex";
+        toggleChatButton.textContent = isChatVisible ? "+" : "-";
+        toggleChatButton.style.bottom = isChatVisible
+          ? `${footer.offsetHeight + 20}px`
+          : "560px";
+      });
+
+      // Handle the form submission
+      document
+        .getElementById("ask-form")
+        .addEventListener("submit", function (event) {
+          event.preventDefault();
+          var question = document.getElementById("question").value;
+          document.getElementById("question").value = "";
+
+          if (question.trim() === "") {
+            return;
+          } else {
+            // Append the user's question to the chat box
+            var userMessage = document.createElement("p");
+            userMessage.textContent = question;
+            userMessage.className = "user-message";
+            document.getElementById("chat").appendChild(userMessage);
+
+            fetch("/ask", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ question: question }),
+            })
+              .then((response) => response.json())
+              .then((response) => {
+                // Append the assistant's response to the chat box
+                var assistantMessage = document.createElement("p");
+                assistantMessage.textContent = response.answer;
+                assistantMessage.className = "assistant-message";
+                document.getElementById("chat").appendChild(assistantMessage);
+              })
+              .catch((error) => {
+                // Handle any exceptions that occurred during fetch process
+                console.error("An error occurred during fetch:", error);
+
+                // Append the assistant's response to the chat box
+                var assistantMessage = document.createElement("p");
+                assistantMessage.textContent = "An error occurred";
+                assistantMessage.className = "assistant-message";
+                document.getElementById("chat").appendChild(assistantMessage);
+              });
+          }
+        });
+    </script>
+  </body>
+</html>
